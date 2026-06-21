@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "format-lint": "bunx --bun @biomejs/biome check --write src"
+    "format-lint": "bunx --bun @biomejs/biome check --write src",
+    "format-lint:check": "bunx --bun @biomejs/biome check src"
   },
   "dependencies": {
     "discord.js": "^14.26.4"
