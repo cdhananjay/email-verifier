@@ -9,16 +9,6 @@ CREATE TABLE "Config" (
 );
 
 -- CreateTable
-CREATE TABLE "Profile" (
-    "id" SERIAL NOT NULL,
-    "username" TEXT NOT NULL,
-    "guildId" TEXT NOT NULL,
-    "isVerified" BOOLEAN NOT NULL,
-
-    CONSTRAINT "Profile_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "user" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,

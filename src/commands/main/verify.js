@@ -5,7 +5,6 @@ export const data = new SlashCommandBuilder()
 	.setDescription("Gives you the verified role.");
 export async function execute(interaction) {
 	const guildId = interaction.guild.id;
-	const username = interaction.user.username;
 	const member = interaction.member;
 
 	try {
@@ -32,26 +31,32 @@ export async function execute(interaction) {
 			});
 		}
 
-		const profile = await prisma.profile.findFirst({
-			where: { guildId: guildId, username: username },
+		const linkedAcc = await prisma.account.findFirst({
+			where: { accountId: interaction.user.id },
 		});
-		if (!profile?.isVerified) {
+		const dbUser = await prisma.user.findUnique({
+			where: { id: linkedAcc?.userId },
+		});
+
+		const verified =
+			dbUser?.emailVerified === true &&
+			dbUser?.email.split("@")[1] === config.domain;
+
+		if (!verified) {
 			return interaction.reply({
 				content:
 					`**Steps to verify:**` +
 					`\n1. Visit ${process.env.AUTH_SITE_URL}.` +
-					`\n2. Login with your discord account.` +
-					`\n3. Set server id as \`${guildId}\`.` +
-					`\n-# tip: Discord app running on mobile devices lets you click on \`inline code blocks\` to copy them.` +
-					`\n4. Add your email that exists on \`${config.domain}\` domain.` +
-					`\n5. Run \`/verify\` again on this discord server.`,
+					`\n3. Login with an email registered on the \`${config.domain}\` domain.` +
+					`\n4. Run \`/verify\` again on this discord server.`,
 				flags: MessageFlags.Ephemeral,
 			});
 		}
 
 		await member.roles.add(config.verifiedRoleId);
+
 		return interaction.reply({
-			content: `Gave you the <@&${role.id}> role`,
+			content: `Gave you the <@&${config.verifiedRoleId}> role.`,
 			flags: MessageFlags.Ephemeral,
 		});
 	} catch (err) {
