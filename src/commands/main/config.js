@@ -126,8 +126,13 @@ export async function execute(interaction) {
 			});
 			const domain = config?.domain;
 			const verifiedRoleId = config?.verifiedRoleId;
+
+			// to check if the role with verified role id is deleted from the server or not
+			const verifiedRoleExists =
+				await interaction.guild.roles.fetch(verifiedRoleId);
+
 			return interaction.reply({
-				content: `Domain: ${domain ? `\`${domain}\`` : "NOT SET"}\nVerified Role: ${verifiedRoleId ? `<@&${verifiedRoleId}>` : "NOT SET"}`,
+				content: `Domain: ${domain ? `\`${domain}\`` : "NOT SET"}\nVerified Role: ${verifiedRoleId && verifiedRoleExists ? `<@&${verifiedRoleId}>` : "NOT SET"}`,
 				flags: MessageFlags.Ephemeral,
 			});
 		} catch (err) {

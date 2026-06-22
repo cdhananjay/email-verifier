@@ -13,7 +13,12 @@ export async function execute(interaction) {
 			where: { guildId: guildId },
 		});
 
-		if (!config?.verifiedRoleId || !config?.domain) {
+		// to check if the role with verified role id is deleted from the server or not
+		const verifiedRoleExists = await interaction.guild.roles.fetch(
+			config?.verifiedRoleId,
+		);
+
+		if (!config?.verifiedRoleId || !config?.domain || !verifiedRoleExists) {
 			return interaction.reply({
 				content: `Domain or Verified Role not set for this server. If you are an admin, run the \`/config\` commands to set them.`,
 				flags: MessageFlags.Ephemeral,
