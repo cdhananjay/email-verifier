@@ -47,9 +47,11 @@ export async function execute(interaction) {
 				content:
 					`**Steps to verify:**` +
 					`\n1. Visit ${process.env.AUTH_SITE_URL}.` +
-					`\n3. Login with an email registered on the \`${config.domain}\` domain.` +
+					`\n2. Login with an email registered on the \`${config.domain}\` domain.` +
+					`\n3. Link your discord account.` +
 					`\n4. Run \`/verify\` again on this discord server.`,
 				flags: MessageFlags.Ephemeral,
+				embeds: [],
 			});
 		}
 
