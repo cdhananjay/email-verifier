@@ -37,6 +37,10 @@ export const data = new SlashCommandBuilder()
 
 	.addSubcommand((subcommand) =>
 		subcommand.setName("view").setDescription("View current configuration"),
+	)
+
+	.addSubcommand((subcommand) =>
+		subcommand.setName("reset").setDescription("Reset the server config."),
 	);
 
 export async function execute(interaction) {
@@ -133,6 +137,24 @@ export async function execute(interaction) {
 
 			return interaction.reply({
 				content: `Domain: ${domain ? `\`${domain}\`` : "NOT SET"}\nVerified Role: ${verifiedRoleId && verifiedRoleExists ? `<@&${verifiedRoleId}>` : "NOT SET"}`,
+				flags: MessageFlags.Ephemeral,
+			});
+		} catch (err) {
+			console.log(err);
+			return interaction.reply({
+				content: "please try again later",
+				flags: MessageFlags.Ephemeral,
+			});
+		}
+	}
+
+	if (subcommand === "reset") {
+		try {
+			await prisma.config.delete({
+				where: { guildId: guildId },
+			});
+			return interaction.reply({
+				content: `The config domain & verified role has been reset.`,
 				flags: MessageFlags.Ephemeral,
 			});
 		} catch (err) {
