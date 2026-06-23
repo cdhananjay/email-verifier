@@ -3,7 +3,7 @@ on:
   push:
     branches: [main]
 jobs:
-  lint:
+  format-lint-typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -12,3 +12,4 @@ jobs:
           bun-version: latest
       - run: bun install
       - run: bun format-lint:check
+      - run: bun typecheck

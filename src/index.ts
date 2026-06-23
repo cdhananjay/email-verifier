@@ -1,9 +1,27 @@
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import process from "node:process";
-import { Client, Collection, GatewayIntentBits } from "discord.js";
+import {
+	Client,
+	Collection,
+	type Collection as CollectionType,
+	GatewayIntentBits,
+} from "discord.js";
 
 const token = process.env.TOKEN;
+
+interface Command {
+	data: {
+		name: string;
+	};
+	// biome-ignore-start lint: args can be any
+	execute: (...args: any[]) => Promise<void> | void;
+	// biome-ignore-end lint: args can be any
+}
+
+interface ExtendedClient extends Client {
+	commands: CollectionType<string, Command>;
+}
 
 const client = new Client({
 	intents: [
@@ -12,24 +30,28 @@ const client = new Client({
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.MessageContent,
 	],
-});
+}) as ExtendedClient;
 
-client.commands = new Collection();
+client.commands = new Collection<string, Command>();
+
 const foldersPath = join(import.meta.dirname, "commands");
 const commandFolders = readdirSync(foldersPath);
 
 for (const folder of commandFolders) {
 	const commandsPath = join(foldersPath, folder);
 	const commandFiles = readdirSync(commandsPath).filter((file) =>
-		file.endsWith(".js"),
+		file.endsWith(".ts"),
 	);
+
 	for (const file of commandFiles) {
 		const filePath = join(commandsPath, file);
-		const command = require(filePath);
+		const commandModule = await import(filePath);
+		const command = commandModule.default ?? commandModule;
+
 		if ("data" in command && "execute" in command) {
 			client.commands.set(command.data.name, command);
 		} else {
-			console.log(
+			console.warn(
 				`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`,
 			);
 		}
@@ -38,12 +60,14 @@ for (const folder of commandFolders) {
 
 const eventsPath = join(import.meta.dirname, "events");
 const eventFiles = readdirSync(eventsPath).filter((file) =>
-	file.endsWith(".js"),
+	file.endsWith(".ts"),
 );
 
 for (const file of eventFiles) {
 	const filePath = join(eventsPath, file);
-	const event = require(filePath);
+	const eventModule = await import(filePath);
+	const event = eventModule.default ?? eventModule;
+
 	if (event.once) {
 		client.once(event.name, (...args) => event.execute(...args));
 	} else {
@@ -51,4 +75,4 @@ for (const file of eventFiles) {
 	}
 }
 
-client.login(token);
+await client.login(token);

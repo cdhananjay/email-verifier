@@ -1,10 +1,10 @@
-import { prisma } from "../../lib/prisma";
-
-const {
+import {
+	type ChatInputCommandInteraction,
+	MessageFlags,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
-	MessageFlags,
-} = require("discord.js");
+} from "discord.js";
+import { prisma } from "../../lib/prisma";
 
 export const data = new SlashCommandBuilder()
 	.setName("config")
@@ -43,12 +43,21 @@ export const data = new SlashCommandBuilder()
 		subcommand.setName("reset").setDescription("Reset the server config."),
 	);
 
-export async function execute(interaction) {
+export async function execute(
+	interaction: ChatInputCommandInteraction,
+): Promise<void> {
+	if (!interaction.guild) {
+		await interaction.reply({
+			content: "This command can only be executed in a server.",
+			flags: MessageFlags.Ephemeral,
+		});
+		return;
+	}
 	const guildId = interaction.guild.id;
 	const subcommand = interaction.options.getSubcommand();
 
 	if (subcommand === "domain") {
-		const domain = interaction.options.getString("domain");
+		const domain = interaction.options.getString("domain", true);
 
 		try {
 			const config = await prisma.config.findUnique({
@@ -58,109 +67,124 @@ export async function execute(interaction) {
 			if (!config) {
 				await prisma.config.create({
 					data: {
-						guildId: guildId,
-						domain: domain,
+						guildId,
+						domain,
 					},
 				});
-				return interaction.reply({
-					content: `Verification domain set to \`${domain}\``,
-					flags: MessageFlags.Ephemeral,
+			} else {
+				await prisma.config.update({
+					where: { guildId },
+					data: { domain },
 				});
 			}
 
-			await prisma.config.update({
-				where: { guildId: guildId },
-				data: { domain: domain },
+			await interaction.reply({
+				content: `Verification domain set to \`${domain}\``,
+				flags: MessageFlags.Ephemeral,
 			});
 		} catch (err) {
-			console.log(err);
-			return interaction.reply({
-				content: "please try again later",
+			console.error(err);
+
+			await interaction.reply({
+				content: "Please try again later.",
 				flags: MessageFlags.Ephemeral,
 			});
 		}
-		return interaction.reply({
-			content: `Verification domain set to \`${domain}\``,
-			flags: MessageFlags.Ephemeral,
-		});
+
+		return;
 	}
 
 	if (subcommand === "verified-role") {
-		const role = interaction.options.getRole("role");
+		const role = interaction.options.getRole("role", true);
+
 		try {
 			const config = await prisma.config.findUnique({
-				where: { guildId: guildId },
+				where: { guildId },
 			});
 
 			if (!config) {
 				await prisma.config.create({
 					data: {
-						guildId: guildId,
+						guildId,
 						verifiedRoleId: role.id,
 					},
 				});
-				return interaction.reply({
-					content: `Verified role set to <@&${role.id}>`,
-					flags: MessageFlags.Ephemeral,
+			} else {
+				await prisma.config.update({
+					where: { guildId },
+					data: {
+						verifiedRoleId: role.id,
+					},
 				});
 			}
 
-			await prisma.config.update({
-				where: { guildId: guildId },
-				data: { verifiedRoleId: role.id },
+			await interaction.reply({
+				content: `Verified role set to <@&${role.id}>`,
+				flags: MessageFlags.Ephemeral,
 			});
 		} catch (err) {
-			console.log(err);
-			return interaction.reply({
-				content: "please try again later",
+			console.error(err);
+
+			await interaction.reply({
+				content: "Please try again later.",
 				flags: MessageFlags.Ephemeral,
 			});
 		}
-		return interaction.reply({
-			content: `Verified role set to <@&${role.id}>`,
-			flags: MessageFlags.Ephemeral,
-		});
+
+		return;
 	}
 
 	if (subcommand === "view") {
 		try {
 			const config = await prisma.config.findUnique({
-				where: { guildId: guildId },
-				select: { domain: true, verifiedRoleId: true },
+				where: { guildId },
+				select: {
+					domain: true,
+					verifiedRoleId: true,
+				},
 			});
-			const domain = config?.domain;
-			const verifiedRoleId = config?.verifiedRoleId;
 
-			// to check if the role with verified role id is deleted from the server or not
-			const verifiedRoleExists =
-				await interaction.guild.roles.fetch(verifiedRoleId);
+			const verifiedRoleExists = config?.verifiedRoleId
+				? await interaction.guild.roles.fetch(config.verifiedRoleId)
+				: null;
 
-			return interaction.reply({
-				content: `Domain: ${domain ? `\`${domain}\`` : "NOT SET"}\nVerified Role: ${verifiedRoleId && verifiedRoleExists ? `<@&${verifiedRoleId}>` : "NOT SET"}`,
+			await interaction.reply({
+				content: `Domain: ${
+					config?.domain ? `\`${config.domain}\`` : "NOT SET"
+				}\nVerified Role: ${
+					config?.verifiedRoleId && verifiedRoleExists
+						? `<@&${config.verifiedRoleId}>`
+						: "NOT SET"
+				}`,
 				flags: MessageFlags.Ephemeral,
 			});
 		} catch (err) {
-			console.log(err);
-			return interaction.reply({
-				content: "please try again later",
+			console.error(err);
+
+			await interaction.reply({
+				content: "Please try again later.",
 				flags: MessageFlags.Ephemeral,
 			});
 		}
+
+		return;
 	}
 
 	if (subcommand === "reset") {
 		try {
 			await prisma.config.delete({
-				where: { guildId: guildId },
+				where: { guildId },
 			});
-			return interaction.reply({
-				content: `The config domain & verified role has been reset.`,
+
+			await interaction.reply({
+				content: "The config domain & verified role has been reset.",
 				flags: MessageFlags.Ephemeral,
 			});
 		} catch (err) {
-			console.log(err);
-			return interaction.reply({
-				content: "please try again later",
+			console.error(err);
+
+			await interaction.reply({
+				content: "Please try again later.",
 				flags: MessageFlags.Ephemeral,
 			});
 		}
