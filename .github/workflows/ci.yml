@@ -1,7 +1,7 @@
 name: CI
 on:
   push:
-    branches: [main]
+    branches: [workflow-test]
 jobs:
   format-lint-typecheck:
     runs-on: ubuntu-latest
@@ -11,5 +11,6 @@ jobs:
         with:
           bun-version: latest
       - run: bun install
+      - run: bun --bunx prisma generate
       - run: bun format-lint:check
       - run: bun typecheck
