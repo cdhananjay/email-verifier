@@ -4,7 +4,8 @@
     "format-lint:check": "bunx --bun @biomejs/biome check src",
     "dev": "bun run --env-file=.env --watch src/index.js",
     "typecheck": "bunx --bun tsc --noEmit",
-    "build": "bun install && bunx --bun prisma migrate deploy && bunx --bun prisma generate"
+    "build": "bun install && bunx --bun prisma migrate deploy && bunx --bun prisma generate",
+    "start": "bun run src/reset-guild-commands.ts && bun run src/deploy-commands.ts && bun run src/index.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",

@@ -59,13 +59,17 @@ Both this bot and its companion authentication website are fully open source. Be
    bun build
    ```
 
-4. Register slash commands with Discord:
+4. Register slash commands with Discord and start the bot:
 
    ```bash
-   bun run --env-file=.env src/deploy-commands.ts
+   bun start
    ```
 
-5. Start the bot:
+   This runs the full pipeline: reset guild commands → deploy global/guild commands → start the bot.
+
+   > **Note:** Set `BUN_ENV=production` in `.env` for global command registration (takes up to an hour to propagate) or omit it for guild-scoped registration (instant refresh).
+
+5. Or start the bot in watch mode during development:
 
    ```bash
    bun dev
@@ -77,9 +81,10 @@ Both this bot and its companion authentication website are fully open source. Be
 | -------------- | ---------------------------------------------- |
 | `TOKEN`        | Discord bot token from the Developer Portal    |
 | `CLIENT_ID`    | Discord application client ID                  |
-| `GUILD_ID`     | Discord server (guild) ID for command registration |
+| `GUILD_ID`     | Discord server (guild) ID for command registration. Optional: only needed for guild-scoped (dev) registration |
 | `DATABASE_URL` | PostgreSQL connection string                   |
 | `AUTH_SITE_URL` | URL of the companion authentication website   |
+| `BUN_ENV`      | Set to `production` for global command registration; omit or set to `development` for guild-scoped registration |
 
 ## Commands
 
@@ -129,6 +134,18 @@ bun typecheck
 
 # Run with file watching
 bun dev
+
+# Full start (reset guild commands → deploy → run)
+bun start
 ```
 
 The CI pipeline (GitHub Actions) runs `format-lint:check` and `typecheck` on every push to `main`.
+
+### Command Registration
+
+`deploy-commands.ts` checks the `BUN_ENV` variable:
+
+- **Development** (default, or `BUN_ENV` unset) : registers commands to a single guild via `GUILD_ID`. Changes take effect instantly, ideal for testing.
+- **Production** (`BUN_ENV=production`) : registers commands globally. Changes can take up to an hour to propagate across Discord.
+
+`reset-guild-commands.ts` clears all guild-scoped commands when `GUILD_ID` is set. This is useful when switching from guild-based development to global production, old guild commands persist and shadow global ones if not cleared. The script exits silently if `GUILD_ID` is not set.

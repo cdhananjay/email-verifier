@@ -53,18 +53,28 @@ try {
 		`Started refreshing ${commands.length} application (/) commands.`,
 	);
 
-	const data = await rest.put(
-		Routes.applicationGuildCommands(clientId, guildId),
-		{
+	if (process.env.BUN_ENV !== "production") {
+		const data = await rest.put(
+			Routes.applicationGuildCommands(clientId, guildId),
+			{
+				body: commands,
+			},
+		);
+		console.log(
+			`Successfully reloaded ${
+				(data as RESTPostAPIChatInputApplicationCommandsJSONBody[]).length
+			} application (/) commands for guild id: ${guildId}.`,
+		);
+	} else {
+		const data = await rest.put(Routes.applicationCommands(clientId), {
 			body: commands,
-		},
-	);
-
-	console.log(
-		`Successfully reloaded ${
-			(data as RESTPostAPIChatInputApplicationCommandsJSONBody[]).length
-		} application (/) commands.`,
-	);
+		});
+		console.log(
+			`Successfully reloaded ${
+				(data as RESTPostAPIChatInputApplicationCommandsJSONBody[]).length
+			} application (/) commands globally.`,
+		);
+	}
 } catch (error) {
 	console.error(error);
 }
