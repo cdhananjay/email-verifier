@@ -10,9 +10,11 @@ A Discord bot that gates server access behind email domain verification.
 - Restrict membership to verified institutional/organisational email domains (e.g. `iiitn.ac.in`, `company.com`)
 - Privacy-preserving: **discord server admins only see *which domain* your email belong to, never your entire email or identity**
 
+### [Add to your server](https://email-verifier.vercel.app/)
+
 ## Overview & Use Case
 
-Members authenticate through an authentication website using their email address on that domain. Once authenticated, users can run `/verify` in Discord and receive the verified role set by server admin.
+Members authenticate through an authentication website [email-verifier.vercel.app/verify](https://email-verifier.vercel.app/verify) using their email address on that domain. Once authenticated, users can run `/verify` in Discord and receive the verified role set by server admin.
 
 This bot is intended to be paired with a companion authentication website built with [Better Auth](https://www.better-auth.com). Users authenticate on that site via a one-time login link sent to their email inbox. 
 
