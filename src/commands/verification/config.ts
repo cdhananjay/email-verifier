@@ -53,6 +53,9 @@ export async function execute(
 		});
 		return;
 	}
+
+	await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
 	const guildId = interaction.guild.id;
 	const subcommand = interaction.options.getSubcommand();
 
@@ -78,16 +81,14 @@ export async function execute(
 				});
 			}
 
-			await interaction.reply({
+			await interaction.editReply({
 				content: `Verification domain set to \`${domain}\``,
-				flags: MessageFlags.Ephemeral,
 			});
 		} catch (err) {
 			console.error(err);
 
-			await interaction.reply({
+			await interaction.editReply({
 				content: "Please try again later.",
-				flags: MessageFlags.Ephemeral,
 			});
 		}
 
@@ -118,16 +119,14 @@ export async function execute(
 				});
 			}
 
-			await interaction.reply({
+			await interaction.editReply({
 				content: `Verified role set to <@&${role.id}>`,
-				flags: MessageFlags.Ephemeral,
 			});
 		} catch (err) {
 			console.error(err);
 
-			await interaction.reply({
+			await interaction.editReply({
 				content: "Please try again later.",
-				flags: MessageFlags.Ephemeral,
 			});
 		}
 
@@ -148,7 +147,7 @@ export async function execute(
 				? await interaction.guild.roles.fetch(config.verifiedRoleId)
 				: null;
 
-			await interaction.reply({
+			await interaction.editReply({
 				content: `Domain: ${
 					config?.domain ? `\`${config.domain}\`` : "NOT SET"
 				}\nVerified Role: ${
@@ -156,14 +155,12 @@ export async function execute(
 						? `<@&${config.verifiedRoleId}>`
 						: "NOT SET"
 				}`,
-				flags: MessageFlags.Ephemeral,
 			});
 		} catch (err) {
 			console.error(err);
 
-			await interaction.reply({
+			await interaction.editReply({
 				content: "Please try again later.",
-				flags: MessageFlags.Ephemeral,
 			});
 		}
 
@@ -176,16 +173,14 @@ export async function execute(
 				where: { guildId },
 			});
 
-			await interaction.reply({
+			await interaction.editReply({
 				content: "The config domain & verified role has been reset.",
-				flags: MessageFlags.Ephemeral,
 			});
 		} catch (err) {
 			console.error(err);
 
-			await interaction.reply({
+			await interaction.editReply({
 				content: "Please try again later.",
-				flags: MessageFlags.Ephemeral,
 			});
 		}
 	}
