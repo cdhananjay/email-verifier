@@ -24,9 +24,7 @@ interface ExtendedClient extends Client {
 }
 
 const client = new Client({
-	intents: [
-		GatewayIntentBits.Guilds,
-	],
+	intents: [GatewayIntentBits.Guilds],
 }) as ExtendedClient;
 
 client.commands = new Collection<string, Command>();
