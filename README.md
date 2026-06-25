@@ -9,6 +9,8 @@
 A Discord bot that gates server access behind email domain verification.
 - Restrict membership to verified institutional/organisational email domains (e.g. `iiitn.ac.in`, `company.com`)
 - Privacy-preserving: **discord server admins only see *which domain* your email belong to, never your entire email or identity**
+- Your Discord email is **never accessed or stored** the companion site uses OAuth scope `identify` only
+- All verification data is automatically purged every 24 hours via a cron job on the companion site.
 
 ### [Add to your server](https://email-verifier-bot.vercel.app/)
 
@@ -119,7 +121,7 @@ If all checks pass, you receive the verified role. Otherwise, the bot tells you 
 - **Discord Library:** [discord.js](https://discord.js.org) v14
 - **ORM:** [Prisma](https://www.prisma.io)
 - **Database:** PostgreSQL
-- **Auth Framework:** [Better Auth](https://www.better-auth.com) (companion site)
+- **Auth Framework:** [Better Auth](https://www.better-auth.com) + [Nodemailer](https://nodemailer.com) with Gmail SMTP (companion site)
 - **Linter / Formatter:** [Biome](https://biomejs.dev)
 
 ## Development
